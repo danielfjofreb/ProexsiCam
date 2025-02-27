@@ -43,11 +43,13 @@
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.button1 = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.button2 = new System.Windows.Forms.Button();
             this.buttonChangeColor = new System.Windows.Forms.Button();
-            this.pictureBox2 = new System.Windows.Forms.PictureBox();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.btnDuplicado = new System.Windows.Forms.Button();
+            this.label4 = new System.Windows.Forms.Label();
+            this.cbxModo = new System.Windows.Forms.ComboBox();
+            this.pictureBox2 = new System.Windows.Forms.PictureBox();
+            this.button2 = new System.Windows.Forms.Button();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -96,7 +98,7 @@
             this.comboBox2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox2.DropDownWidth = 138;
             this.comboBox2.FormattingEnabled = true;
-            this.comboBox2.Location = new System.Drawing.Point(544, 3);
+            this.comboBox2.Location = new System.Drawing.Point(430, 3);
             this.comboBox2.Name = "comboBox2";
             this.comboBox2.Size = new System.Drawing.Size(138, 21);
             this.comboBox2.TabIndex = 3;
@@ -119,7 +121,7 @@
             this.label2.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.label2.AutoSize = true;
             this.label2.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.label2.Location = new System.Drawing.Point(472, 3);
+            this.label2.Location = new System.Drawing.Point(358, 3);
             this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(60, 13);
@@ -150,24 +152,6 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
-            // button2
-            // 
-            this.button2.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.button2.AutoSize = true;
-            this.button2.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.button2.FlatAppearance.BorderSize = 2;
-            this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button2.Image = global::ProexsiCam.Properties.Resources.Camara130;
-            this.button2.Location = new System.Drawing.Point(1017, 275);
-            this.button2.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(140, 140);
-            this.button2.TabIndex = 0;
-            this.toolTip1.SetToolTip(this.button2, "Tomar Foto");
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
-            this.button2.KeyDown += new System.Windows.Forms.KeyEventHandler(this.button2_KeyDown);
-            // 
             // buttonChangeColor
             // 
             this.buttonChangeColor.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
@@ -181,6 +165,44 @@
             this.buttonChangeColor.UseVisualStyleBackColor = true;
             this.buttonChangeColor.Click += new System.EventHandler(this.buttonChangeColor_Click);
             // 
+            // btnDuplicado
+            // 
+            this.btnDuplicado.Location = new System.Drawing.Point(1063, 627);
+            this.btnDuplicado.Name = "btnDuplicado";
+            this.btnDuplicado.Size = new System.Drawing.Size(75, 23);
+            this.btnDuplicado.TabIndex = 11;
+            this.btnDuplicado.Text = "¿Duplicado?";
+            this.btnDuplicado.UseVisualStyleBackColor = true;
+            this.btnDuplicado.Click += new System.EventHandler(this.btnDuplicado_Click);
+            // 
+            // label4
+            // 
+            this.label4.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.label4.AutoSize = true;
+            this.label4.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.label4.Location = new System.Drawing.Point(622, 2);
+            this.label4.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(34, 13);
+            this.label4.TabIndex = 13;
+            this.label4.Text = "Modo";
+            // 
+            // cbxModo
+            // 
+            this.cbxModo.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.cbxModo.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.cbxModo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbxModo.DropDownWidth = 138;
+            this.cbxModo.FormattingEnabled = true;
+            this.cbxModo.Items.AddRange(new object[] {
+            "Fotografia",
+            "Adjuntar"});
+            this.cbxModo.Location = new System.Drawing.Point(694, 2);
+            this.cbxModo.Name = "cbxModo";
+            this.cbxModo.Size = new System.Drawing.Size(138, 21);
+            this.cbxModo.TabIndex = 12;
+            this.cbxModo.SelectedIndexChanged += new System.EventHandler(this.cbxModo_SelectedIndexChanged);
+            // 
             // pictureBox2
             // 
             this.pictureBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -192,6 +214,23 @@
             this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox2.TabIndex = 7;
             this.pictureBox2.TabStop = false;
+            // 
+            // button2
+            // 
+            this.button2.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.button2.AutoSize = true;
+            this.button2.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.button2.FlatAppearance.BorderSize = 2;
+            this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button2.Location = new System.Drawing.Point(1017, 275);
+            this.button2.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(140, 140);
+            this.button2.TabIndex = 0;
+            this.toolTip1.SetToolTip(this.button2, "Tomar Foto");
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.button2.KeyDown += new System.Windows.Forms.KeyEventHandler(this.button2_KeyDown);
             // 
             // pictureBox1
             // 
@@ -206,22 +245,14 @@
             this.pictureBox1.TabIndex = 10;
             this.pictureBox1.TabStop = false;
             // 
-            // btnDuplicado
-            // 
-            this.btnDuplicado.Location = new System.Drawing.Point(1063, 627);
-            this.btnDuplicado.Name = "btnDuplicado";
-            this.btnDuplicado.Size = new System.Drawing.Size(75, 23);
-            this.btnDuplicado.TabIndex = 11;
-            this.btnDuplicado.Text = "¿Duplicado?";
-            this.btnDuplicado.UseVisualStyleBackColor = true;
-            this.btnDuplicado.Click += new System.EventHandler(this.btnDuplicado_Click);
-            // 
             // Ventana
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.SystemColors.ControlDarkDark;
             this.ClientSize = new System.Drawing.Size(1166, 682);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.cbxModo);
             this.Controls.Add(this.btnDuplicado);
             this.Controls.Add(this.buttonChangeColor);
             this.Controls.Add(this.checkBoxGrid);
@@ -265,6 +296,8 @@
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.Button btnDuplicado;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.ComboBox cbxModo;
     }
 }
 

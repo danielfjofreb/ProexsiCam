@@ -10,6 +10,8 @@ using System.IO;
 using System.Threading;
 using System.Text.RegularExpressions;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using ProexsiCam.Properties;
+using System.Security.Cryptography;
 
 namespace ProexsiCam
 {
@@ -24,6 +26,7 @@ namespace ProexsiCam
         private Bitmap currentFrame;    // Almacena el frame actual sin rejilla
         private int Ancho;
         private int Alto;
+        private int modo = 0;
 
         public Ventana()
         {
@@ -34,14 +37,15 @@ namespace ProexsiCam
         {
             // Carga las configuraciones desde los archivos de texto
             await CargaColor();
-            await CargaDispositivosAsync();
             showGrid = await leerRejillaAsync();
             checkBoxGrid.Checked = showGrid;
-
+            CargaModo();
+            
             pictureBox2.Visible = false;
 
             // Esta no es una configuracion que se guarde, pero podria hacerse si quisiese, ya que existen los controles necesarios
-            Ruta = textBox1.Text;
+            Ruta = await leerRuta();
+            textBox1.Text = Ruta;
         }
 
 
@@ -160,7 +164,16 @@ namespace ProexsiCam
         int boton = 0;
         private void button2_Click(object sender, EventArgs e)
         {
-            TomaFoto();
+            switch (modo)
+            {
+                case 0:
+                    TomaFoto();
+                    break;
+                case 1:
+                    AdjuntarFoto();
+                    break;
+            }
+            
         }
 
         private void TomaFoto()
@@ -174,6 +187,45 @@ namespace ProexsiCam
                 boton++;
                 pictureBox2.Visible = false;
             }
+        }
+
+        private void AdjuntarFoto()
+        {
+            try
+            {
+                using (var dialog = new OpenFileDialog())
+                {
+                    dialog.Filter = "Archivos de imagen|*.jpg;*.png;*.bmp;*.gif";
+                    if (dialog.ShowDialog() == DialogResult.OK)
+                    {
+                        pictureBox1.Image = Image.FromFile(dialog.FileName);
+                        if (MessageBox.Show("¿Desea importar fotografía al servidor?", "Importar", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                        {
+                            if (pictureBox1.Image != null)
+                            {
+                                Adjunta adjunta = new Adjunta();
+                                adjunta.ShowDialog();
+                                string rutjpg = adjunta.Aceptar();
+
+                                if (rutjpg != null || !rutjpg.Equals(""))
+                                {
+                                    pictureBox2.BackgroundImage = ForceAspectRatio((Bitmap)pictureBox1.Image.Clone(), 4, 3);
+                                    pictureBox1.Visible = true;
+                                    pictureBox2.BackgroundImage.Save(Path.Combine(Ruta, $"{rutjpg}.jpg"), ImageFormat.Jpeg);
+                                    Thread.Sleep(1000);
+                                    MessageBox.Show("Foto guardada correctamente", "Confirmación", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                }
+                                pictureBox2.Visible = false;
+                            }
+                        }
+                    }
+                }
+            }
+            catch(Exception ex) { MessageBox.Show("Error al guardar: \n" + ex); }
+            pictureBox1.Image = null;
+            pictureBox2.Image = null;
+            pictureBox1.BackgroundImage = null;
+            pictureBox2.BackgroundImage = null;
         }
 
 
@@ -194,6 +246,7 @@ namespace ProexsiCam
             int originalHeight = original.Height;
             float originalRatio = (float)originalWidth / originalHeight;
 
+            // Determinar el área de recorte
             Rectangle cropRect;
             if (originalRatio > desiredRatio) // Imagen es más ancha que el 4:3
             {
@@ -208,6 +261,7 @@ namespace ProexsiCam
                 cropRect = new Rectangle(0, yOffset, originalWidth, newHeight);
             }
 
+            // Recortar la imagen
             Bitmap croppedBitmap = new Bitmap(cropRect.Width, cropRect.Height);
             using (Graphics g = Graphics.FromImage(croppedBitmap))
             {
@@ -215,8 +269,25 @@ namespace ProexsiCam
                     cropRect, GraphicsUnit.Pixel);
             }
 
+            // Si la imagen es mayor a 960x720, reducirla
+            int maxWidth = 960;
+            int maxHeight = 720;
+
+            if (croppedBitmap.Width > maxWidth || croppedBitmap.Height > maxHeight)
+            {
+                Bitmap resizedBitmap = new Bitmap(maxWidth, maxHeight);
+                using (Graphics g = Graphics.FromImage(resizedBitmap))
+                {
+                    g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                    g.DrawImage(croppedBitmap, new Rectangle(0, 0, maxWidth, maxHeight));
+                }
+                croppedBitmap.Dispose(); // Liberar la memoria de la imagen anterior
+                return resizedBitmap;
+            }
+
             return croppedBitmap;
         }
+
 
 
         private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
@@ -376,6 +447,34 @@ namespace ProexsiCam
             return txt;
         }
 
+        private string leerModo()
+        {
+            try
+            {
+                using (TextReader leerResolucion = new StreamReader(@"C:\MyCam\modo.txt"))
+                {
+                    txt = leerResolucion.ReadLine();
+                }
+            }
+            catch
+            {
+                txt = "";
+            }
+            return txt;
+        }
+
+        private async Task<string> leerRuta()
+        {
+            try 
+            {
+                using (TextReader leerRuta = new StreamReader(@"C:\MyCam\ruta.txt"))
+                {
+                    txt = leerRuta.ReadLine();
+                }
+            }
+            catch { txt = @"C:\Proexsi\FOTOS"; } return txt;
+        }
+
         private async Task escribirRejilla(bool rejilla)
         {
             using (TextWriter escribeRejilla = new StreamWriter(@"C:\MyCam\Rejilla.txt"))
@@ -408,6 +507,38 @@ namespace ProexsiCam
             }
         }
 
+        private async Task escribirModo(string modo)
+        {
+            try
+            {
+                using (TextWriter escribeResolucion = new StreamWriter(@"C:\MyCam\modo.txt"))
+                {
+                    await escribeResolucion.WriteLineAsync(modo.ToString());
+                }
+            }
+            catch
+            {
+                MessageBox.Show("No se pudo guardar la configuracion, verifique existencia de carpeta 'MyCam'");
+            }
+        }
+
+        private async Task escribirRuta(string ruta)
+        {
+            try
+            {
+                using (TextWriter escribeRuta = new StreamWriter(@"C:\MyCam\ruta.txt"))
+                {
+                    await escribeRuta.WriteLineAsync(ruta.ToString());
+                }
+            }
+            catch
+            {
+                MessageBox.Show("No se pudo guardar la configuracion, verifique existencia de carpeta 'MyCam' en disco C");
+            }
+        }
+
+
+
         private async void button1_Click(object sender, EventArgs e)
         {
             using (var dialog = new FolderBrowserDialog())
@@ -416,6 +547,7 @@ namespace ProexsiCam
                 {
                     textBox1.Text = dialog.SelectedPath;
                     Ruta = dialog.SelectedPath;
+                    await escribirRuta(dialog.SelectedPath);
                 }
             }
         }
@@ -473,8 +605,60 @@ namespace ProexsiCam
 
         private void btnDuplicado_Click(object sender, EventArgs e)
         {
-            CargaDuplicado cargaDuplicado = new CargaDuplicado();
+            CargaDuplicado cargaDuplicado = new CargaDuplicado(Ruta);
             cargaDuplicado.ShowDialog();
+        }
+
+        private async void cbxModo_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            modo = cbxModo.SelectedIndex;
+            switch (cbxModo.SelectedIndex)
+            {
+                case 0: modoFoto();
+                    await escribirModo(cbxModo.SelectedIndex.ToString());
+                    break;
+                case 1: modoAdjuntar();
+                    pictureBox1.Image = null; pictureBox2.Image = null;
+                    pictureBox1.BackgroundImage = null; pictureBox2.BackgroundImage = null;
+                    await escribirModo(cbxModo.SelectedIndex.ToString());
+                    break;
+            }
+        }
+
+        public async void modoFoto()
+        {
+            comboBox1.Text = "";
+            comboBox1.Items.Clear();
+            label3.Visible = true;
+            label2.Visible = true;
+            comboBox1.Enabled = true;
+            comboBox2.Enabled = true;
+            comboBox1.Visible = true;
+            comboBox2.Visible = true;
+            await CargaDispositivosAsync();
+            button2.BackgroundImage = Resources.Camara130;
+            toolTip1.SetToolTip(button2,"Tomar Foto");
+
+        }
+
+        public void modoAdjuntar()
+        {
+            CerrarWebCam();
+            comboBox1.Enabled = false;
+            comboBox2.Enabled = false;
+            comboBox1.Visible = false;
+            comboBox2.Visible = false;
+            label3.Visible = false;
+            label2.Visible = false;
+            button2.BackgroundImage = Resources.Adjuntar;
+            toolTip1.SetToolTip(button2, "Adjuntar Foto");
+        }
+
+        private void CargaModo()
+        {
+            string modoAnterior = leerModo();
+            cbxModo.SelectedIndex = int.TryParse(modoAnterior, out modo) ? modo : 0;
+            
         }
     }
 }

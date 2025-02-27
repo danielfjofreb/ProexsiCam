@@ -1,20 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ProexsiCam
 {
     public partial class CargaDuplicado : Form
     {
-        public CargaDuplicado()
+        string rutaGuardado;
+        public CargaDuplicado(string _rutaGuardado)
         {
+            rutaGuardado = _rutaGuardado;
             InitializeComponent();
         }
 
@@ -49,7 +44,7 @@ namespace ProexsiCam
             }
 
             string origen = @"M:\LICENCIA DE CONDUCIR\Fotos\fotosres\" + txtRUTDuplicado.Text+".jpg";
-            string destino = @"C:\Proexsi\FOTOS\"+txtRUTDuplicado.Text+".jpg";
+            string destino = Path.Combine(rutaGuardado, $"{txtRUTDuplicado.Text}.jpg");
 
             try
             {

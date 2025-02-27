@@ -63,6 +63,16 @@ namespace ProexsiCam.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Adjuntar {
+            get {
+                object obj = ResourceManager.GetObject("Adjuntar", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Camara {
             get {
                 object obj = ResourceManager.GetObject("Camara", resourceCulture);
