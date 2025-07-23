@@ -50,7 +50,7 @@
 ## 🛑 Consideraciones
 
 - Algunas rutas están "a fuego" en el código, como `M:\` para recuperación de duplicados, esto lo puedes adaptar a tu gusto o borrarlo dentro de tu proyecto si no lo necesitas.
-- La configuración se guarda en `C:\MyCam\` como archivos `.txt`. Asegúrate de que exista esta carpeta (o tal vez podrias cooperar haciendo que se cree la carpeta si no existe 👀)
+- La configuración se guarda en `C:\MyCam\` como archivos `.txt`. Asegúrate de que exista esta carpeta (aunque el programa igual la va a crear si se te olvida, no te preocupes 👀)
 
 ## 🧾 Licencia
 
