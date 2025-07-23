@@ -387,7 +387,7 @@ namespace ProexsiCam
         }
 
 
-        /* Todos los metodos Leer y Escribir son asincronos, para evitar bloqueos en la interfaz de usuario
+        /* Todos los métodos Leer y Escribir son asincronos, para evitar bloqueos en la interfaz de usuario
            ademas, todos los metodos Leer y Escribir sirven para guardar y cargar las configuraciones del programa */
         private async Task<bool> leerRejillaAsync()
         {
