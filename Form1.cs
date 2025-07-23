@@ -9,23 +9,26 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Threading;
 using System.Text.RegularExpressions;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using ProexsiCam.Properties;
-using System.Security.Cryptography;
 
 namespace ProexsiCam
 {
     public partial class Ventana : Form
     {
         public string Ruta;
+        // Colección de dispositivos de video
         private FilterInfoCollection MisDispositivos;
+        // Dispositivo de captura de video seleccionado
         private VideoCaptureDevice MiWebCam;
+        // Texto para guardar las configuraciones en archivos de texto
         private string txt = "";
+        // Color de fondo del formulario
         private Color color;
         private bool showGrid = false;  // Controla la rejilla de la foto
         private Bitmap currentFrame;    // Almacena el frame actual sin rejilla
         private int Ancho;
         private int Alto;
+        // Modo de operación: 0 para tomar foto, 1 para adjuntar foto
         private int modo = 0;
 
         public Ventana()
@@ -44,6 +47,7 @@ namespace ProexsiCam
             pictureBox2.Visible = false;
 
             // Esta no es una configuracion que se guarde, pero podria hacerse si quisiese, ya que existen los controles necesarios
+            // Actualizacion: Ahora si guarda y carga la ruta de guardado
             Ruta = await leerRuta();
             textBox1.Text = Ruta;
         }
@@ -81,12 +85,17 @@ namespace ProexsiCam
             CargaResolucion();
         }
 
+
+        // Función para verificar si hay dispositivos de video conectados
         private bool HayDispositivos()
         {
             MisDispositivos = new FilterInfoCollection(FilterCategory.VideoInputDevice);
             return MisDispositivos.Count > 0;
         }
 
+
+        /* Cierra los procesos de la webcam si están activos, esto sirve para evitar
+           conflictos al cambiar de dispositivo o resolución y ayuda a liberar memoria */
         public void CerrarWebCam()
         {
             if (MiWebCam != null && MiWebCam.IsRunning)
@@ -100,10 +109,16 @@ namespace ProexsiCam
         {
             bool resolucionValidacion = false;
             string resolucionAnterior = leerResolucion();
+
+            /* Limpia las resoluciones soportadas al cambiar de dispositivo, ya que no todos tienen 
+               las mismas resoluciones soportadas, lo mismo pasaría si esta fuese una aplicación de videos
+               con el framerate */
             if (comboBox2.Items.Count >= 0)
             {
                 comboBox2.Items.Clear();
             }
+
+            // Verifica las resoluciones soportadas por el dispositivo de video y las agrega al ComboBox
             for (int j = 0; j < MiWebCam.VideoCapabilities.Length; j++)
             {
                 string resolution_size = MiWebCam.VideoCapabilities[j].FrameSize
@@ -144,6 +159,7 @@ namespace ProexsiCam
             // Crea una copia para dibujar la rejilla
             Bitmap frameWithGrid = (Bitmap)currentFrame.Clone();
 
+            // Si la rejilla está activada, dibuja la rejilla en el frame usando Graphics
             using (Graphics g = Graphics.FromImage(frameWithGrid))
             {
                 if (showGrid)
@@ -151,10 +167,11 @@ namespace ProexsiCam
                     DrawGrid(g, frameWithGrid.Width, frameWithGrid.Height);
                 }
             }
-
+            // Asigna la imagen con la rejilla al PictureBox
             pictureBox1.BackgroundImage = frameWithGrid;
             pictureBox1.BackgroundImageLayout = ImageLayout.Stretch;
         }
+
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
@@ -162,6 +179,8 @@ namespace ProexsiCam
         }
 
         int boton = 0;
+
+        // Evento del botón para tomar o adjuntar foto, según el modo seleccionado
         private void button2_Click(object sender, EventArgs e)
         {
             switch (modo)
@@ -180,15 +199,22 @@ namespace ProexsiCam
         {
             if (currentFrame != null)
             {
+                // Forza la relación de aspecto 4:3 y guarda la imagen
                 pictureBox2.BackgroundImage = ForceAspectRatio((Bitmap)currentFrame.Clone(), 4, 3);
                 pictureBox1.Visible = true;
                 pictureBox2.BackgroundImage.Save(Path.Combine(Ruta, $"{boton}.jpg"), ImageFormat.Jpeg);
+                // Simula un retraso para mostrar la imagen guardada
                 Thread.Sleep(1000);
+                /* Contador sube por si la persona quiere tomarse varias fotos, sin llegar a reemplazar la primera foto,
+                   de este modo se puede elegir entre varias fotos la mejor */
                 boton++;
                 pictureBox2.Visible = false;
             }
         }
 
+
+        /* Método para adjuntar una foto desde el disco duro o desde un dispositivo de almacenamiento
+           Este metodo fue desarrollado para Victoria por su modo de trabajo */
         private void AdjuntarFoto()
         {
             try
@@ -204,11 +230,15 @@ namespace ProexsiCam
                             if (pictureBox1.Image != null)
                             {
                                 Adjunta adjunta = new Adjunta();
+                                // Muestra el formulario Adjunta para ingresar el RUT
                                 adjunta.ShowDialog();
+                                // Obtiene el RUT ingresado por el usuario en el formulario Adjunta
                                 string rutjpg = adjunta.Aceptar();
 
+                                // Verifica si el RUT no es nulo o vacío
                                 if (rutjpg != null || !rutjpg.Equals(""))
                                 {
+                                    // Forza la relación de aspecto 4:3 y guarda la imagen
                                     pictureBox2.BackgroundImage = ForceAspectRatio((Bitmap)pictureBox1.Image.Clone(), 4, 3);
                                     pictureBox1.Visible = true;
                                     pictureBox2.BackgroundImage.Save(Path.Combine(Ruta, $"{rutjpg}.jpg"), ImageFormat.Jpeg);
@@ -221,7 +251,8 @@ namespace ProexsiCam
                     }
                 }
             }
-            catch(Exception ex) { MessageBox.Show("Error al guardar: \n" + ex); }
+            // Captura cualquier excepción que ocurra durante el proceso de adjuntar foto
+            catch (Exception ex) { MessageBox.Show("Error al guardar: \n" + ex); }
             pictureBox1.Image = null;
             pictureBox2.Image = null;
             pictureBox1.BackgroundImage = null;
@@ -229,6 +260,7 @@ namespace ProexsiCam
         }
 
 
+        // Método para cambiar el tamaño del PictureBox según la relación de aspecto
         private int CambiaTamañoPreview()
         {
             double calculo = (double)Ancho / Alto;
@@ -239,6 +271,8 @@ namespace ProexsiCam
             return 0;
         }
 
+
+        // Calcula y ajusta la imagen a una relación de aspecto 4:3, recortando si es necesario
         private Bitmap ForceAspectRatio(Bitmap original, int targetWidth, int targetHeight)
         {
             float desiredRatio = (float)targetWidth / targetHeight;
@@ -289,7 +323,7 @@ namespace ProexsiCam
         }
 
 
-
+        // Evento del ComboBox para seleccionar la resolución de video
         private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
         {
             MiWebCam.Stop();
@@ -301,7 +335,6 @@ namespace ProexsiCam
 
             MiWebCam.VideoResolution = MiWebCam.VideoCapabilities[i];
 
-            //Eliminar despues
             string input = MiWebCam.VideoResolution.FrameSize.ToString();
 
             // Expresión regular para encontrar solo los dígitos
@@ -329,6 +362,7 @@ namespace ProexsiCam
             escribirResolucion(comboBox2.Text);
         }
 
+        // Evento del ComboBox para seleccionar el dispositivo de video
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             // Aseguro de cerrar el proceso anterior para iniciar uno nuevo con el dispositivo correspondiente
@@ -352,6 +386,9 @@ namespace ProexsiCam
             CargaResolucion();
         }
 
+
+        /* Todos los metodos Leer y Escribir son asincronos, para evitar bloqueos en la interfaz de usuario
+           ademas, todos los metodos Leer y Escribir sirven para guardar y cargar las configuraciones del programa */
         private async Task<bool> leerRejillaAsync()
         {
             bool rejilla;
@@ -538,7 +575,7 @@ namespace ProexsiCam
         }
 
 
-
+        // Evento del botón para seleccionar la carpeta de guardado
         private async void button1_Click(object sender, EventArgs e)
         {
             using (var dialog = new FolderBrowserDialog())
@@ -625,6 +662,8 @@ namespace ProexsiCam
             }
         }
 
+
+        // Método para cambiar al modo de tomar foto, esto hace que se carguen los elementos necesarios para este modo
         public async void modoFoto()
         {
             comboBox1.Text = "";
@@ -641,6 +680,8 @@ namespace ProexsiCam
 
         }
 
+        // Método para cambiar al modo de adjuntar foto, esto hace que se oculten los elementos necesarios para este modo
+
         public void modoAdjuntar()
         {
             CerrarWebCam();
@@ -654,6 +695,7 @@ namespace ProexsiCam
             toolTip1.SetToolTip(button2, "Adjuntar Foto");
         }
 
+        // Método para cargar el modo de operación al iniciar la aplicación
         private void CargaModo()
         {
             string modoAnterior = leerModo();
