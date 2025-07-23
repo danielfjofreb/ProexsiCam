@@ -33,7 +33,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>Camara.ico</ApplicationIcon>
+    <ApplicationIcon>Resources\Camara.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AForge, Version=2.2.5.0, Culture=neutral, PublicKeyToken=c1db6ff4eaa06aeb, processorArchitecture=MSIL">
@@ -117,7 +117,7 @@
     <None Include="Resources\Camara130.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Camara.ico" />
+    <Content Include="Resources\Camara.ico" />
     <None Include="Resources\Adjuntar.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

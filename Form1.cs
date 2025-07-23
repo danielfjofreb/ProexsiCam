@@ -202,7 +202,20 @@ namespace ProexsiCam
                 // Forza la relación de aspecto 4:3 y guarda la imagen
                 pictureBox2.BackgroundImage = ForceAspectRatio((Bitmap)currentFrame.Clone(), 4, 3);
                 pictureBox1.Visible = true;
-                pictureBox2.BackgroundImage.Save(Path.Combine(Ruta, $"{boton}.jpg"), ImageFormat.Jpeg);
+                try { 
+                    // Guarda la imagen en la ruta especificada con un nombre basado en el contador 'boton'
+                    if (!Directory.Exists(Ruta))
+                    {
+                        Directory.CreateDirectory(Ruta);
+                        MessageBox.Show("Se ha creado la ruta "+ Ruta +" para guardar las fotos.");
+                    }
+                    pictureBox2.BackgroundImage.Save(Path.Combine(Ruta, $"{boton}.jpg"), ImageFormat.Jpeg);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error al guardar la foto: " + ex.Message);
+                    return;
+                }
                 // Simula un retraso para mostrar la imagen guardada
                 Thread.Sleep(1000);
                 /* Contador sube por si la persona quiere tomarse varias fotos, sin llegar a reemplazar la primera foto,
@@ -553,9 +566,10 @@ namespace ProexsiCam
                     await escribeResolucion.WriteLineAsync(modo.ToString());
                 }
             }
-            catch
+            catch(Exception ex)
             {
-                MessageBox.Show("No se pudo guardar la configuracion, verifique existencia de carpeta 'MyCam'");
+                MessageBox.Show("No se pudo guardar la configuracion, se creará nueva carpeta 'MyCam' en el disco C para guardar sus preferencias");
+                Directory.CreateDirectory(@"C:\MyCam");
             }
         }
 
@@ -570,7 +584,8 @@ namespace ProexsiCam
             }
             catch
             {
-                MessageBox.Show("No se pudo guardar la configuracion, verifique existencia de carpeta 'MyCam' en disco C");
+                MessageBox.Show(@"No se pudo guardar la configuracion, verifique existencia de carpeta 'MyCam' en disco C:\");
+                Directory.CreateDirectory(@"C:\MyCam");
             }
         }
 
