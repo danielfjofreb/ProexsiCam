@@ -45,7 +45,7 @@
 1. Selecciona el modo: Captura o Adjuntar.
 2. Si usas "Captura", selecciona el dispositivo y resolución.
 3. Toma la foto o adjunta una desde tu equipo.
-4. El software guardará la imagen en la carpeta seleccionada, con el nombre basado en el RUT.
+4. El software guardará la imagen en la carpeta seleccionada, con el nombre basado en el RUT en caso de ser un adjunto o con un numero que va en aumento de acuerdo a la cantidad de fotos que tome.
 
 ## 🛑 Consideraciones
 
